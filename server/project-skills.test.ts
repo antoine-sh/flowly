@@ -72,6 +72,15 @@ test("refuses a missing project folder and a bad name", async () => {
   await expect(writeSkill(await root(), { ...skill, name: "../x" }, "new")).rejects.toThrow("SKILL_INVALID");
 });
 
+test("refuses skill paths that escape through a symlink", async () => {
+  const dir = await root();
+  const outside = await realpath(await mkdtemp(join(tmpdir(), "flowly-skills-outside-")));
+  roots.push(outside);
+  await symlink(outside, join(dir, ".agents"));
+  await expect(writeSkill(dir, skill, "new")).rejects.toThrow("SKILL_PATH_UNSAFE");
+  await expect(readFile(join(outside, "skills/flowly-ship/SKILL.md"), "utf8")).rejects.toThrow();
+});
+
 test("scans both folders and reads descriptions", async () => {
   const dir = await root();
   await mkdir(join(dir, ".claude/skills/hand"), { recursive: true });

@@ -49,7 +49,7 @@ export async function readSkillBody(root: string, name: string): Promise<string 
 
 export class SkillInstallError extends Error {
   constructor(
-    readonly code: "PROJECT_ROOT_MISSING" | "SKILL_EXISTS" | "SKILL_MISSING" | "SKILL_INVALID",
+    readonly code: "PROJECT_ROOT_MISSING" | "SKILL_EXISTS" | "SKILL_MISSING" | "SKILL_INVALID" | "SKILL_PATH_UNSAFE",
     message: string,
   ) {
     super(`${code}: ${message}`);
@@ -57,6 +57,23 @@ export class SkillInstallError extends Error {
 }
 
 export type InstallResult = { path: string; linked: boolean; notice?: string };
+
+async function rejectSymlinkedPath(root: string, target: string) {
+  const rootPath = await realpath(root);
+  const targetPath = resolve(target);
+  const rel = relative(rootPath, targetPath);
+  if (rel.startsWith("..") || resolve(rootPath, rel) !== targetPath) {
+    throw new SkillInstallError("SKILL_PATH_UNSAFE", "The skill path is outside the project.");
+  }
+  let current = rootPath;
+  for (const part of rel.split("/").filter(Boolean)) {
+    current = join(current, part);
+    const stat = await lstat(current).catch(() => null);
+    if (stat?.isSymbolicLink()) {
+      throw new SkillInstallError("SKILL_PATH_UNSAFE", "The skill path contains a symbolic link.");
+    }
+  }
+}
 
 /**
  * Writes the skill (atomically) and links it for Claude Code (§4.2, §4.3). A new skill
@@ -73,6 +90,8 @@ export async function writeSkill(
   if (!rootStat) throw new SkillInstallError("PROJECT_ROOT_MISSING", `The project folder ${root} does not exist.`);
   const dir = agentsSkillDir(root, skill.name);
   const file = skillPath(root, skill.name);
+  await rejectSymlinkedPath(root, dir);
+  await rejectSymlinkedPath(root, file);
   if (mode === "new" && (await exists(dir))) throw new SkillInstallError("SKILL_EXISTS", `A skill named ${skill.name} is already in the project.`);
   if (mode === "update" && !(await exists(file))) throw new SkillInstallError("SKILL_MISSING", `.agents/skills/${skill.name}/SKILL.md is no longer in the project.`);
   await mkdir(dir, { recursive: true });

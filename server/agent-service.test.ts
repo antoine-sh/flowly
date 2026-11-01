@@ -29,7 +29,7 @@ const input = (
   note = "checkpoint",
 ) => ({ expectedRevision: ctx.revision, request: ctx.request, note });
 
-test("reads live scope and foreign native owner; read telemetry does not write board", async () => {
+test("reads live scope and foreign native owner; read operations do not write board", async () => {
   const x = await setup(),
     before = await readFile(x.store.path, "utf8"),
     ctx = await x.service.get(x.identity);

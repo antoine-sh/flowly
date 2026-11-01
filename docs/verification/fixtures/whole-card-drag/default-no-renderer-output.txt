@@ -38,7 +38,7 @@ responseMode: 'json' drops mid-call notifications. subscriptions/listen streams 
  ✓ server/service.test.ts > new card uses only native root even in a previously multi-repo project 43ms
  ✓ server/service.test.ts > a common parent directory contains two repositories without registering each separately 33ms
  ✓ server/service.test.ts > new board project links the exact native Paseo root and persists only that directory 6ms
- ✓ server/agent-service.test.ts > reads live scope and foreign native owner; read telemetry does not write board 70ms
+ ✓ server/agent-service.test.ts > reads live scope and foreign native owner; read operations do not write board 70ms
 stderr | server/tool-server.test.ts > loopback host/origin/credential guards and scoped request validation
 responseMode: 'json' drops mid-call notifications. subscriptions/listen streams are always served over SSE regardless; other notifications emitted before a result are dropped.
 
@@ -94,4 +94,3 @@ responseMode: 'json' drops mid-call notifications. subscriptions/listen streams 
       Tests  50 passed | 7 skipped (57)
    Start at  11:13:00
    Duration  1.80s (transform 385ms, setup 0ms, import 911ms, tests 4.77s, environment 1ms)
-
