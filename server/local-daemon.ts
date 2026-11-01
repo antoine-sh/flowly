@@ -8,7 +8,7 @@ import { DaemonClient } from "@getpaseo/client/internal/daemon-client";
 /**
  * The local daemon cannot be reached right now for a reason outside Flowly: it
  * is restarting (no address yet) or this Paseo has no local credential. Logged,
- * not reported to telemetry (TELEMETRY-SPEC §11.2).
+ * not sent outside the local Paseo daemon.
  */
 export class LocalDaemonUnavailable extends Error {
   override name = "LocalDaemonUnavailable";

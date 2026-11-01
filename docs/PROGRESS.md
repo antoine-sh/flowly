@@ -14,18 +14,13 @@
 - Version 1.7.1 (`make bump`). Release notes: [release-notes/v1.7.1.md](release-notes/v1.7.1.md), covering v1.7.0..main (#69, db1d734, 4476b43).
 - No What's new entry and no tour or tip change: the release fixes existing behavior; the tabbed questions are found where questions already appear.
 
-## Telemetry error fixes (card "遥测错误分析") — 2026-10-27
+## Telemetry removed — 2026-11-01
 
-- First two days of `$exception` reports (34 events, 35 installs) grouped and mapped to source with `scripts/map-bundle-lines.mjs`: [verification/telemetry-errors-2026-10-27.md](verification/telemetry-errors-2026-10-27.md).
-- Local daemon connection (`server/local-daemon.ts`, 13 events): `paseo.pid` addresses are resolved like the `paseo` CLI, including Unix sockets and Windows named pipes (through the bundled `ws`, now a pinned dependency; typed by `server/ws.d.ts` because `@types/ws` breaks the daemon's timer types). An empty address (Paseo restarting the daemon) is `LocalDaemonUnavailable`. Fixes read-state sync, workspace restore, background-workspace reuse, attention clearing, summarizer delete and `paseo_version` on those installs. [WORKSPACE-RESTORE-SPEC](WORKSPACE-RESTORE-SPEC.md)
-- Windows CLI (`server/paseo-cli.ts`, 3 events): `paseo.cmd` is started as the command it wraps (`Paseo.exe` + runner + CLI entry, or Node + npm's `bin/paseo`), never through cmd.exe; session settings and native project create/delete share it. [UI-REFRESH-SPEC](UI-REFRESH-SPEC.md)
-- Not reported any more (logged as before): `DaemonConnectionError`, `LocalDaemonUnavailable`, `SummaryModelError`. A missing folder or session image is answered with a plain message instead of `ENOENT`. [TELEMETRY-SPEC §11.2](TELEMETRY-SPEC.md)
-- Not verified on Linux or Windows hardware; see the report.
-- Onboarding: no tour, tip or What's new change; these are fixes to existing behavior.
+- Removed anonymous usage and error telemetry, its settings/RPC/UI, documentation, tests, and PostHog integration.
 
 ## v1.7.0 release preparation (card "v1.7.0发布") — 2026-10-26
 
-- Version 1.7.0 (`make bump` now also sets `shared/version.ts`, which `server/telemetry.test.ts` keeps equal to package.json). Release notes: [release-notes/v1.7.0.md](release-notes/v1.7.0.md), covering v1.6.0..main (#57–#67 and the Insights redesign).
+- Version 1.7.0 (`make bump` now also sets `shared/version.ts`). Release notes: [release-notes/v1.7.0.md](release-notes/v1.7.0.md), covering v1.6.0..main (#57–#67 and the Insights redesign).
 - What's new 1.7.0: six items (Insights redesign, skill drafts, faster loading, phone settings and the running sweep switch, SQLite with backups, usage data); the old Insights one-liner is replaced in all catalogs. [WHATS-NEW-SPEC](WHATS-NEW-SPEC.md) §6.
 - What's new navigation (W5): ‹ Flowly x.y › beside the version pages left to older and right to newer releases, items slide in from that side; the footer keeps only Got it. §5.0.
 - Welcome tour: the Insights page sample now shows weekday labels, a selected day, the day summary card with per-card bars and a two-line skill row, matching the 1.7 Insights page.
@@ -42,13 +37,6 @@
 - `docs/promo/shot-lib.mjs` `hidePrivate` hid the whole compact board (the walk up from the project label reached the column holding the board); it now hides only siblings on the tab's own row.
 - Independent verification (Haiku 5.5): first round on 16a117d found the wide preview polling stop, the lost idea-link retry and swallowed read errors (fixed in 24e417c) and parity gaps (closed in 24e417c and 96b4620); re-verification on 24e417c confirmed the fixes. Report: `docs/verification/loading-r2-2026-10-26/README.md`.
 - Onboarding: no tour, tip or What's new change; nothing new to point at, the board only loads less.
-
-## Anonymous usage data (telemetry) — 2026-10-26
-
-- User decisions 2026-10-26: PostHog Cloud EU over its capture HTTP API (no SDK), one daily heartbeat, whitelisted fields, on by default and sent before the user has seen the notice, off stops everything, no preview or reset ID, `ui_locale` instead of GeoIP. [Spec](TELEMETRY-SPEC.md).
-- Implemented: `server/telemetry.ts` (heartbeat, `telemetry.json`, forced-off env), `telemetry` host setting and `telemetry.status` RPC, Settings → General *Usage data* and the tour's last page, What's new 1.7.0 item, README sections, catalogs in all 9 languages. `server/telemetry.test.ts` covers spec §9 items 1–8.
-- 2026-10-26 error reports (user decision: separate `$exception` event with a cleaned stack, daemon only; spec §11): `server/error-report.ts` cleans stacks (type, safe code, Flowly's own frames relative to the plugin folder, no message), `reportRpcErrors` wraps every `server.handle` (expected errors skipped), `logFailure` replaces the background `console.error` sites, `uncaughtExceptionMonitor` for errors through Flowly code; each kind once per UTC day, 20 a day. Setting detail and What's new 1.7.0 text mention errors (9 catalogs). `server/error-report.test.ts` covers §11.5.
-- 2026-10-26: `POSTHOG_KEY` filled in. The maintainer's PostHog project is in the US region (the EU endpoint rejected the token, `us.i.posthog.com/flags` accepted it), so per the user's decision the endpoint moved to `https://us.i.posthog.com/i/v0/e/`.
 
 ## Board data in SQLite (minimal) — 2026-10-26
 
